@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "streamlit-segment-slider"
+version = "0.1.0"
+description = "A multi-handle range slider for Streamlit -- split a range into any number of segments, with a pie chart/legend or compact inline labels."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "pjpeacock", email = "philip.j.peacock@gmail.com" },
+]
+keywords = ["streamlit", "streamlit-component", "slider", "range-slider", "component"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Framework :: Streamlit",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Widget Sets",
+]
+# Verified against 1.61.1 (where st.components.v2 is confirmed present) -- not necessarily the
+# exact release that first introduced it, so treat this as a floor known to work, not a precise
+# historical minimum.
+dependencies = [
+    "streamlit>=1.61.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["streamlit_segment_slider"]

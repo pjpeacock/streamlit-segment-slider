@@ -10,6 +10,8 @@ Built on [Streamlit Custom Components v2](https://docs.streamlit.io/develop/api-
 and [noUiSlider](https://refreshless.com/nouislider/) (loaded from a CDN at runtime -- see
 **Requirements** below). Pure Python, inline component -- no npm install, no build step.
 
+[GitHub repository](https://github.com/pjpeacock/streamlit-segment-slider)
+
 ## Install
 
 ```bash

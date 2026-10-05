@@ -28,5 +28,10 @@ dependencies = [
     "streamlit>=1.61.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/pjpeacock/streamlit-segment-slider"
+Repository = "https://github.com/pjpeacock/streamlit-segment-slider"
+Issues = "https://github.com/pjpeacock/streamlit-segment-slider/issues"
+
 [tool.hatch.build.targets.wheel]
 packages = ["streamlit_segment_slider"]

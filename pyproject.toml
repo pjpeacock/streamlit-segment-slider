@@ -15,7 +15,6 @@ authors = [
 keywords = ["streamlit", "streamlit-component", "slider", "range-slider", "component"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Framework :: Streamlit",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",

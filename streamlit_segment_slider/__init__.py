@@ -69,8 +69,15 @@ CSS = """
     margin-bottom: 0.4rem;
 }
 
+/* Top padding leaves room for the handle tooltip, which is positioned above the track via
+   .noUi-tooltip's own `bottom: 160%` -- 1.8rem used to be a little short: measured live, the
+   tooltip's own top edge sat ~7.4px above this component's host element's top edge, and since
+   the host clips rather than scrolls past its own boundary (same root cause as the legend
+   overflow fixed elsewhere in this file), that ~7.4px of the tooltip was silently cut off on
+   every slider, in every mode, not just the compact one. 2.4rem (~38.4px) covers the measured
+   gap plus a safety margin. */
 .slider-wrap {
-    padding: 1.8rem 0.5rem 0;
+    padding: 2.4rem 0.5rem 0;
 }
 
 
@@ -200,10 +207,22 @@ CSS = """
 /* ---------------------------------------------------------
    LEGEND
 --------------------------------------------------------- */
+/* max-height + overflow-y (direct fix) -- with enough segments, the legend's natural height
+   used to exceed the component's own fixed `height=`, and since the host clips at that boundary
+   rather than growing or scrolling, the overflow wasn't just unreadable, it was invisible: rows
+   past whatever fit were silently cut off, and the pie above it (vertically centered against the
+   now-oversized chart-section row) ended up only half-visible too, clipped by that same boundary.
+   200px matches .pie's own max dimension below, so the two columns stay visually aligned up to
+   that point; past it, the legend scrolls internally instead of pushing the whole section taller
+   than the host will show. */
 .legend {
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.4rem;
+    scrollbar-width: thin;
 }
 
 .legend-row {
@@ -262,8 +281,6 @@ export default function(component) {
         parentElement.querySelector(".slider-label");
     const segmentLabels =
         parentElement.querySelector(".segment-labels");
-    const rangeLabels =
-        parentElement.querySelector(".range-labels");
     const minLabel =
         parentElement.querySelector(".min-label");
     const maxLabel =
@@ -277,15 +294,18 @@ export default function(component) {
 
     /* -----------------------------------------------------
        DISPLAY OPTIONS -- two independent toggles (see
-       segment_slider()'s own docstring). Only one of
-       segmentLabels/rangeLabels is ever shown at once.
+       segment_slider()'s own docstring). rangeLabels (the
+       plain min/max row) always shows regardless of
+       show_segment_labels now -- direct feedback that
+       hiding the actual range endpoints (e.g. 0/100) once
+       segment_labels took over that row was a real loss of
+       information, not a redundant duplicate of it; the two
+       rows now stack instead of replacing one another.
     ----------------------------------------------------- */
     chartSection.style.display =
         data.show_chart ? "grid" : "none";
     segmentLabels.style.display =
         data.show_segment_labels ? "block" : "none";
-    rangeLabels.style.display =
-        data.show_segment_labels ? "none" : "flex";
 
     /* -----------------------------------------------------
        SEGMENT COUNT -- driven entirely by how many dividing
@@ -667,7 +687,7 @@ def segment_slider(
     narrow for either is left blank rather than overlapping its neighbors.
 
     `height` is exposed (not hardcoded) so a caller can size this to its own layout; left as None,
-    it resolves to 390px with the chart shown, or ~75-100px with the chart hidden (less again if
+    it resolves to 390px with the chart shown, or ~110-140px with the chart hidden (less again if
     `label` is also left empty, since that row then takes no space at all) -- override it
     explicitly for anything in between.
 
@@ -702,16 +722,21 @@ def segment_slider(
     if height is None:
         # Each branch measured, not guessed, against the rendered widget's own bounding box, plus
         # a small safety margin -- a too-generous default here leaves a visible gap of dead space
-        # before whatever comes after this widget on the page. 390 (chart shown) is the original
-        # design height, unaffected by label. Chart hidden: ~88px measured with a label shown,
-        # ~59px with label="" (the label row itself hides entirely when empty) -- these aren't the
-        # same height, so this resolves on both show_chart and whether label is actually set.
+        # before whatever comes after this widget on the page; a too-tight one silently clips real
+        # content (the min/max row, or a handle tooltip) against the host's own boundary, which
+        # doesn't scroll or show any sign anything's missing -- see this file's own CSS comments on
+        # .slider-wrap and .legend for two real bugs that came from exactly that. 390 (chart shown)
+        # is the original design height, unaffected by label. Chart hidden: measured 125px tall
+        # with a label shown, 96px with label="" (the label row itself hides entirely when empty)
+        # -- re-measured after the min/max row became always-visible (it used to be swapped out for
+        # the segment labels, not shown alongside them), which is why these are taller than this
+        # same measurement was before that change.
         if show_chart:
             height = 390
         elif label:
-            height = 100
+            height = 140
         else:
-            height = 75
+            height = 110
 
     result = _segment_slider_component(
         data={
